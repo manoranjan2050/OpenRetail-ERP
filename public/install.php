@@ -24,7 +24,7 @@ $success = false;
 function check_requirements(): array {
     $checks = [];
     $checks['PHP >= 8.1'] = version_compare(PHP_VERSION, '8.1.0', '>=');
-    foreach (['pdo', 'pdo_mysql', 'mbstring', 'openssl', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'fileinfo', 'curl'] as $ext) {
+    foreach (['pdo', 'pdo_mysql', 'mbstring', 'openssl', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'fileinfo'] as $ext) {
         $checks["ext-$ext"] = extension_loaded($ext);
     }
     $checks['storage/ writable'] = is_writable(BASE_PATH . '/storage');
@@ -563,8 +563,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'business_name' => trim($_POST['business_name'] ?? 'My Business'),
             'app_url'       => trim($_POST['app_url'] ?? 'http://localhost'),
         ];
+        $_SESSION['admin']['password_confirm'] = $_POST['admin_password_confirm'] ?? '';
         $pw = $_SESSION['admin']['password'];
         if (strlen($pw) < 8) $errors[] = 'Password must be at least 8 characters.';
+        if ($pw !== $_SESSION['admin']['password_confirm']) $errors[] = 'Passwords do not match.';
         if (!filter_var($_SESSION['admin']['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid admin email.';
         if (!$_SESSION['admin']['name']) $errors[] = 'Admin name is required.';
         if (!$errors) $step = 4;
@@ -968,11 +970,24 @@ input:focus {
         <label>Admin Email <span class="req">*</span></label>
         <input type="email" name="admin_email" value="<?= htmlspecialchars($_SESSION['admin']['email'] ?? '') ?>" required>
       </div>
-      <div class="form-group">
-        <label>Admin Password <span class="req">*</span></label>
-        <input type="password" name="admin_password" required minlength="8">
-        <div class="hint">Minimum 8 characters</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Admin Password <span class="req">*</span></label>
+          <input type="password" name="admin_password" required minlength="8" id="pw1">
+          <div class="hint">Minimum 8 characters</div>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password <span class="req">*</span></label>
+          <input type="password" name="admin_password_confirm" required minlength="8" id="pw2">
+          <div class="hint" id="pw-match" style="color:var(--red);display:none">Passwords do not match</div>
+        </div>
       </div>
+      <script>
+      document.getElementById('pw2').addEventListener('input',function(){
+        var match = this.value===document.getElementById('pw1').value;
+        document.getElementById('pw-match').style.display = match||!this.value ? 'none':'block';
+      });
+      </script>
       <div class="btn-row">
         <a href="?step=2" class="back">← Back</a>
         <button type="submit" class="btn btn-primary">Continue →</button>
@@ -1042,7 +1057,7 @@ input:focus {
       </div>
 
       <div style="margin-top:24px;">
-        <a href="../" class="btn btn-success" style="justify-content:center;width:100%;font-size:16px;">
+        <a href="./" class="btn btn-success" style="justify-content:center;width:100%;font-size:16px;">
           🚀 Open OpenRetail ERP
         </a>
       </div>
