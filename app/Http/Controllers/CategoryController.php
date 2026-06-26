@@ -5,21 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
-        return Inertia::render('Categories/Index', [
+        return view('categories.index', [
             'categories' => Category::withCount('products')->orderBy('name')->get(),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('Categories/Form');
+        return view('categories.form');
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,9 +28,9 @@ class CategoryController extends Controller
         return redirect()->route('categories.index')->with('success', 'Category created.');
     }
 
-    public function edit(Category $category): Response
+    public function edit(Category $category): View
     {
-        return Inertia::render('Categories/Form', ['category' => $category]);
+        return view('categories.form', ['category' => $category]);
     }
 
     public function update(Request $request, Category $category): RedirectResponse

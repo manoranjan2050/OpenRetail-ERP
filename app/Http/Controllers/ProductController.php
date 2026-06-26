@@ -10,13 +10,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', Product::class);
 
@@ -28,17 +27,17 @@ class ProductController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('Products/Index', [
+        return view('products.index', [
             'products' => $products,
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'filters' => $request->only(['search', 'category_id', 'low_stock']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
         $this->authorize('create', Product::class);
-        return Inertia::render('Products/Form', [
+        return view('products.form', [
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'units' => Unit::orderBy('name')->get(['id', 'name', 'symbol']),
             'gstRates' => [0, 5, 12, 18, 28],
@@ -86,10 +85,10 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product created.');
     }
 
-    public function edit(Product $product): Response
+    public function edit(Product $product): View
     {
         $this->authorize('update', $product);
-        return Inertia::render('Products/Form', [
+        return view('products.form', [
             'product' => $product,
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'units' => Unit::orderBy('name')->get(['id', 'name', 'symbol']),

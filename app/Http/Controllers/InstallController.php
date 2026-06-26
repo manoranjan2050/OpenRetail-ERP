@@ -12,15 +12,14 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class InstallController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
         $checks = $this->requirementsCheck();
-        return Inertia::render('Install/Index', ['checks' => $checks]);
+        return view('install.index', ['checks' => $checks]);
     }
 
     public function check(): JsonResponse

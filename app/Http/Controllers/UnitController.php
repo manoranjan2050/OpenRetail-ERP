@@ -5,19 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class UnitController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
-        return Inertia::render('Units/Index', ['units' => Unit::orderBy('name')->get()]);
+        return view('units.index', ['units' => Unit::orderBy('name')->get()]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('Units/Form');
+        return view('units.form');
     }
 
     public function store(Request $request): RedirectResponse
@@ -27,9 +26,9 @@ class UnitController extends Controller
         return redirect()->route('units.index')->with('success', 'Unit created.');
     }
 
-    public function edit(Unit $unit): Response
+    public function edit(Unit $unit): View
     {
-        return Inertia::render('Units/Form', ['unit' => $unit]);
+        return view('units.form', ['unit' => $unit]);
     }
 
     public function update(Request $request, Unit $unit): RedirectResponse

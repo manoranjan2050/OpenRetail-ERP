@@ -8,15 +8,14 @@ use App\Models\StoreCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
         $this->authorize('viewAny', BusinessSetting::class);
-        return Inertia::render('Settings/Index', [
+        return view('settings.index', [
             'settings' => BusinessSetting::instance(),
             'stores' => Store::with('category')->get(),
             'storeCategories' => StoreCategory::all(),

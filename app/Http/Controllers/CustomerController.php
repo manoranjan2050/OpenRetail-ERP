@@ -8,12 +8,11 @@ use App\Services\LedgerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', Customer::class);
         $customers = Customer::withSum([
@@ -28,16 +27,16 @@ class CustomerController extends Controller
                 'balance' => (float) ($c->debit_total - $c->credit_total),
             ]));
 
-        return Inertia::render('Customers/Index', [
+        return view('customers.index', [
             'customers' => $customers,
             'filters' => $request->only(['search']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
         $this->authorize('create', Customer::class);
-        return Inertia::render('Customers/Form');
+        return view('customers.form');
     }
 
     public function store(Request $request): RedirectResponse
@@ -56,21 +55,21 @@ class CustomerController extends Controller
         return redirect()->route('customers.index')->with('success', 'Customer created.');
     }
 
-    public function show(Customer $customer): Response
+    public function show(Customer $customer): View
     {
         $this->authorize('view', $customer);
         $ledger = $customer->ledgerEntries()->with('creator')->latest('id')->paginate(30);
-        return Inertia::render('Customers/Show', [
+        return view('customers.show', [
             'customer' => $customer->append('balance'),
             'ledger' => $ledger,
             'invoices' => $customer->invoices()->latest()->limit(10)->get(),
         ]);
     }
 
-    public function edit(Customer $customer): Response
+    public function edit(Customer $customer): View
     {
         $this->authorize('update', $customer);
-        return Inertia::render('Customers/Form', ['customer' => $customer]);
+        return view('customers.form', ['customer' => $customer]);
     }
 
     public function update(Request $request, Customer $customer): RedirectResponse

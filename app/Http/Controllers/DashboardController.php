@@ -7,12 +7,11 @@ use App\Models\Invoice;
 use App\Models\LedgerEntry;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): View
     {
         $totalProducts = Product::count();
         $totalCustomers = Customer::count();
@@ -52,7 +51,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get(['id', 'name', 'stock_qty', 'low_stock_threshold', 'unit_id']);
 
-        return Inertia::render('Dashboard', [
+        return view('dashboard', [
             'stats' => [
                 'totalProducts' => $totalProducts,
                 'totalCustomers' => $totalCustomers,

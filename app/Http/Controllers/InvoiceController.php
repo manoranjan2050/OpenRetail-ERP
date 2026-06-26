@@ -11,13 +11,12 @@ use App\Services\InvoiceService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class InvoiceController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', Invoice::class);
         $invoices = Invoice::with(['customer', 'salesman'])
@@ -28,16 +27,16 @@ class InvoiceController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('Invoices/Index', [
+        return view('invoices.index', [
             'invoices' => $invoices,
             'filters' => $request->only(['search', 'status', 'customer_id']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
         $this->authorize('create', Invoice::class);
-        return Inertia::render('Invoices/Create', [
+        return view('invoices.create', [
             'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'name', 'mobile', 'credit_limit', 'billing_cycle']),
             'products' => Product::where('is_active', true)->orderBy('name')->get(['id', 'name', 'sale_price', 'gst_rate', 'stock_qty', 'unit_id']),
             'stores' => Store::where('is_active', true)->get(['id', 'name']),
@@ -70,7 +69,7 @@ class InvoiceController extends Controller
         return redirect()->route('invoices.show', $invoice)->with('success', "Invoice {$invoice->number} created.");
     }
 
-    public function show(Invoice $invoice): Response
+    public function show(Invoice $invoice): View
     {
         $this->authorize('view', $invoice);
         $invoice->load(['items.product', 'customer', 'salesman', 'store']);
@@ -82,7 +81,7 @@ class InvoiceController extends Controller
             $qrCode = base64_encode(QrCode::format('png')->size(150)->generate($upiString));
         }
 
-        return Inertia::render('Invoices/Show', [
+        return view('invoices.show', [
             'invoice' => $invoice,
             'settings' => $settings->only(['business_name', 'address', 'gstin', 'upi_id', 'payee_name', 'show_qr_on_invoice']),
             'qrCode' => $qrCode,
