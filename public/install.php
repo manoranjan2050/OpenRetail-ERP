@@ -93,6 +93,7 @@ ENV;
         '/^APP_KEY=.*/m'       => 'APP_KEY=' . $data['app_key'],
         '/^APP_URL=.*/m'       => 'APP_URL=' . $data['app_url'],
         '/^APP_NAME=.*/m'      => 'APP_NAME="' . addslashes($data['app_name']) . '"',
+        '/^DB_CONNECTION=.*/m' => 'DB_CONNECTION=mysql',
         '/^DB_HOST=.*/m'       => 'DB_HOST=' . $data['db_host'],
         '/^DB_PORT=.*/m'       => 'DB_PORT=' . $data['db_port'],
         '/^DB_DATABASE=.*/m'   => 'DB_DATABASE=' . $data['db_name'],
@@ -103,7 +104,8 @@ ENV;
         '/^LOG_LEVEL=.*/m'     => 'LOG_LEVEL=error',
     ];
 
-    $content = $template;
+    // Uncomment any commented-out DB lines first
+    $content = preg_replace('/^#\s*(DB_HOST|DB_PORT|DB_DATABASE|DB_USERNAME|DB_PASSWORD)=/m', '$1=', $template);
     foreach ($replacements as $pattern => $replacement) {
         $new = preg_replace($pattern, $replacement, $content);
         $content = $new !== null ? $new : $content . "\n" . $replacement;
