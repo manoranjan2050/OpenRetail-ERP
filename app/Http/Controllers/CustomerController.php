@@ -8,6 +8,7 @@ use App\Services\LedgerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
@@ -47,9 +48,16 @@ class CustomerController extends Controller
             'mobile' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
+            'customer_type' => 'nullable|in:retail,wholesale,distributor,vip',
+            'gstin' => 'nullable|string|max:15',
             'credit_limit' => 'nullable|numeric|min:0',
-            'billing_cycle' => 'required|in:none,weekly,monthly',
+            'billing_cycle' => 'required|in:none,weekly,monthly,yearly',
+            'photo' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('customers', 'public');
+        }
 
         Customer::create($data);
         return redirect()->route('customers.index')->with('success', 'Customer created.');
@@ -80,9 +88,17 @@ class CustomerController extends Controller
             'mobile' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
+            'customer_type' => 'nullable|in:retail,wholesale,distributor,vip',
+            'gstin' => 'nullable|string|max:15',
             'credit_limit' => 'nullable|numeric|min:0',
-            'billing_cycle' => 'required|in:none,weekly,monthly',
+            'billing_cycle' => 'required|in:none,weekly,monthly,yearly',
+            'photo' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('photo')) {
+            if ($customer->photo) Storage::disk('public')->delete($customer->photo);
+            $data['photo'] = $request->file('photo')->store('customers', 'public');
+        }
 
         $customer->update($data);
         return redirect()->route('customers.index')->with('success', 'Customer updated.');
